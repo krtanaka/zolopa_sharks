@@ -25,27 +25,32 @@ df$Shark = gsub("Data insufficient", "Species unknown", df$Shark)
 freq_activitiy <- count(df, Activity)
 freq_sharks <- count(df, Shark)
 
+png("wordcloud_activity.png", height = 5, width = 5, units = "in", res = 500)
+
 set.seed(2022)
-
-par(mfrow = c(1,2))
-
-png("Wordclouds.png", height = 3, width = 8, units = "in")
 
 wordcloud(words = freq_activitiy$Activity, 
           freq = freq_activitiy$n, 
           min.freq = 1,
           random.order = F, 
           rot.per = 0.2,
-          colors = matlab.like(17)) + title("Activities")
+          colors = matlab.like(17))
+
+dev.off()
+
+png("wordcloud_shark.png", height = 5, width = 5, units = "in", res = 500)
+
+set.seed(2022)
 
 wordcloud(words = freq_sharks$Shark, 
           freq = freq_sharks$n, 
           min.freq = 1,
           random.order = F, 
           rot.per = 0.2,
-          colors = matlab.like(6)) + title("Species")
+          colors = viridis(9))
 
 dev.off()
+
 
 df <- df %>% separate("Date_and_Time", c("Date", "Time"), sep = "\\, ")
 df <- df %>% separate("Date", c("Year", "Month", "Day"), sep = "/")
@@ -57,6 +62,8 @@ df$Time = gsub("before 3:30 am", "3:00 am", df$Time)
 df$Time = gsub("est. 8:30 am", "8:30 am", df$Time)
 
 df$Time = format(as.POSIXct(df$Time,format='%I:%M %p'),format="%H:%M:%S")
+
+png("time_activity.png", height = 6, width = 13, units = "in", res = 500)
 
 (df %>% 
     mutate(Time = substr(Time, 1, 2)) %>% 
@@ -70,3 +77,6 @@ df$Time = format(as.POSIXct(df$Time,format='%I:%M %p'),format="%H:%M:%S")
     theme(legend.position = c(1, 1),
           legend.justification = c(1, 0.95),
           axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, size = 10)))
+
+dev.off()
+
