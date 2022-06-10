@@ -1,9 +1,11 @@
 library(readr)
 library(wordcloud)
 library(viridisLite)
-library(wordcloud2)
 library(dplyr)
 library(tidyr)
+library(ggplot2)
+library(cowplot)
+library(colorRamps)
 
 rm(list = ls())
 
@@ -25,6 +27,8 @@ freq_sharks <- count(df, Shark)
 
 set.seed(2022)
 
+par(mfrow = c(1,2))
+
 wordcloud(words = freq_activitiy$Activity, 
           freq = freq_activitiy$n, 
           min.freq = 1,
@@ -39,5 +43,26 @@ wordcloud(words = freq_sharks$Shark,
           rot.per = 0.2,
           colors = viridis(6))
 
+df <- df %>% separate("Date_and_Time", c("Date", "Time"), sep = "\\, ")
+df <- df %>% separate("Date", c("Year", "Month", "Day"), sep = "/")
 
+df$Time = gsub("noon", "pm", df$Time)
+df$Time = gsub("p.m.", "pm", df$Time)
+df$Time = gsub("approx 9:00 am", "9:00 am", df$Time)
+df$Time = gsub("before 3:30 am", "3:00 am", df$Time)
+df$Time = gsub("est. 8:30 am", "8:30 am", df$Time)
 
+df$Time = format(as.POSIXct(df$Time,format='%I:%M %p'),format="%H:%M:%S")
+
+(df %>% 
+    mutate(Time = substr(Time, 1, 2)) %>% 
+    group_by(Time, Activity) %>% 
+    summarise(Freq = n()) %>% 
+    ggplot(aes(x = Time, y = Freq, fill = Activity)) +
+    geom_bar(stat = "identity", show.legend = T) + 
+    xlab("Time of the day") + ylab("Frequency") +
+    theme_half_open() +
+    scale_fill_manual("", values = matlab.like(17)) +
+    theme(legend.position = c(1, 1),
+          legend.justification = c(1, 0.95),
+          axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, size = 10)))
