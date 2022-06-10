@@ -29,19 +29,23 @@ set.seed(2022)
 
 par(mfrow = c(1,2))
 
+png("Wordclouds.png", height = 3, width = 8, units = "in")
+
 wordcloud(words = freq_activitiy$Activity, 
           freq = freq_activitiy$n, 
           min.freq = 1,
           random.order = F, 
           rot.per = 0.2,
-          colors = viridis(6))
+          colors = matlab.like(17)) + title("Activities")
 
 wordcloud(words = freq_sharks$Shark, 
           freq = freq_sharks$n, 
           min.freq = 1,
           random.order = F, 
           rot.per = 0.2,
-          colors = viridis(6))
+          colors = matlab.like(6)) + title("Species")
+
+dev.off()
 
 df <- df %>% separate("Date_and_Time", c("Date", "Time"), sep = "\\, ")
 df <- df %>% separate("Date", c("Year", "Month", "Day"), sep = "/")
